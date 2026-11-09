@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鲜果乐园 - 后台管理系统</title>
+<style>
+  :root { --green:#07C160; --bg:#f5f6f7; --card:#fff; --text:#333; --muted:#999; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); font-size:14px; }
+  /* 登录页 */
+  #login { position:fixed; inset:0; background:linear-gradient(135deg,#0aa858,#07C160 60%,#3ddc84); display:flex; align-items:center; justify-content:center; }
+  .login-card { background:#fff; border-radius:16px; padding:40px; width:360px; box-shadow:0 20px 60px rgba(0,0,0,.15); }
+  .login-card h1 { font-size:22px; text-align:center; margin-bottom:8px; }
+  .login-card p.tip { text-align:center; color:var(--muted); margin-bottom:24px; font-size:12px; }
+  .login-card input { width:100%; height:44px; border:1px solid #ddd; border-radius:8px; padding:0 14px; margin-bottom:14px; font-size:14px; outline:none; }
+  .login-card input:focus { border-color:var(--green); }
+  .btn { background:var(--green); color:#fff; border:none; border-radius:8px; height:44px; width:100%; font-size:16px; cursor:pointer; }
+  .btn:hover { opacity:.9; }
+  .login-err { color:#e5484d; font-size:12px; height:18px; }
+  /* 主布局 */
+  #app { display:none; }
+  aside { position:fixed; left:0; top:0; bottom:0; width:200px; background:#2b3137; color:#cfd6dd; padding-top:20px; }
+  aside .logo { text-align:center; font-size:18px; font-weight:bold; color:#fff; padding:16px 0 24px; }
+  aside a { display:block; padding:14px 24px; cursor:pointer; color:#cfd6dd; text-decoration:none; }
+  aside a.active, aside a:hover { background:#07C160; color:#fff; }
+  main { margin-left:200px; padding:24px; }
+  h2.page { font-size:20px; margin-bottom:16px; }
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+  .stat { background:var(--card); border-radius:12px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  .stat .num { font-size:26px; font-weight:700; margin-top:6px; }
+  .stat .lbl { color:var(--muted); font-size:12px; }
+  .card { background:var(--card); border-radius:12px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.06); margin-bottom:20px; }
+  table { width:100%; border-collapse:collapse; }
+  th,td { text-align:left; padding:10px 8px; border-bottom:1px solid #f0f0f0; font-size:13px; }
+  th { color:var(--muted); font-weight:500; background:#fafafa; }
+  .tag { padding:2px 10px; border-radius:10px; font-size:12px; display:inline-block; }
+  .tag.pending { background:#fff7e6; color:#d48806; }
+  .tag.shipping { background:#e6f7ff; color:#1677ff; }
+  .tag.done { background:#f6ffed; color:#389e0d; }
+  .tag.cancelled { background:#fff1f0; color:#cf1322; }
+  .tag.onsale { background:#f6ffed; color:#389e0d; }
+  .tag.off { background:#f5f5f5; color:#999; }
+  button.op { padding:4px 10px; border:1px solid #ddd; background:#fff; border-radius:6px; cursor:pointer; font-size:12px; margin-right:6px; }
+  button.op.primary { background:var(--green); color:#fff; border-color:var(--green); }
+  button.op.danger { color:#e5484d; border-color:#e5484d; }
+  button.op:hover { opacity:.85; }
+  /* 弹窗 */
+  .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:10; }
+  .modal { background:#fff; border-radius:12px; padding:24px; width:420px; max-height:80vh; overflow:auto; }
+  .modal h3 { margin-bottom:16px; }
+  .modal label { display:block; margin:10px 0 4px; color:var(--muted); font-size:12px; }
+  .modal input, .modal select, .modal textarea { width:100%; border:1px solid #ddd; border-radius:6px; padding:8px 10px; font-size:14px; outline:none; }
+  .modal textarea { height:60px; resize:vertical; }
+  .modal .row { display:flex; gap:12px; justify-content:flex-end; margin-top:16px; }
+  .modal .row button { width:auto; padding:0 20px; }
+  .toolbar { display:flex; gap:10px; align-items:center; margin-bottom:14px; }
+  .toolbar input { height:36px; border:1px solid #ddd; border-radius:6px; padding:0 10px; outline:none; }
+  .toolbar .btn { width:auto; padding:0 20px; height:36px; font-size:14px; }
+</style>
+</head>
+<body>
+
+<!-- 登录 -->
+<div id="login">
+  <div class="login-card">
+    <h1>🍊 鲜果乐园后台</h1>
+    <p class="tip">水果销售管理系统 · 管理员登录</p>
+    <input id="user" placeholder="用户名" value="admin">
+    <input id="pass" type="password" placeholder="密码" value="admin123">
+    <div class="login-err" id="loginErr"></div>
+    <button class="btn" onclick="login()">登 录</button>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div id="app">
+  <aside>
+    <div class="logo">🍊 鲜果乐园</div>
+    <a class="active" data-page="dashboard" onclick="showPage('dashboard')">📊 数据看板</a>
+    <a data-page="fruits" onclick="showPage('fruits')">🍇 商品管理</a>
+    <a data-page="orders" onclick="showPage('orders')">📦 订单管理</a>
+    <a onclick="logout()">🚪 退出登录</a>
+  </aside>
+  <main>
+    <!-- 看板 -->
+    <section id="page-dashboard">
+      <h2 class="page">数据看板</h2>
+      <div class="stats" id="stats"></div>
+      <div class="card"><h3 style="margin-bottom:10px">⚠️ 库存预警（低于 20）</h3><div id="lowStock" style="color:var(--muted)">暂无</div></div>
+    </section>
+    <!-- 商品 -->
+    <section id="page-fruits" style="display:none">
+      <h2 class="page">商品管理</h2>
+      <div class="card">
+        <div class="toolbar">
+          <button class="btn" onclick="openFruitModal()">＋ 新增商品</button>
+          <input id="fruitSearch" placeholder="搜索商品名" oninput="renderFruits()">
+        </div>
+        <table><thead><tr><th>商品</th><th>分类</th><th>价格</th><th>单位</th><th>库存</th><th>产地</th><th>状态</th><th>操作</th></tr></thead><tbody id="fruitRows"></tbody></table>
+      </div>
+    </section>
+    <!-- 订单 -->
+    <section id="page-orders" style="display:none">
+      <h2 class="page">订单管理</h2>
+      <div class="card">
+        <table><thead><tr><th>订单号</th><th>商品</th><th>金额</th><th>收货人电话</th><th>地址</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="orderRows"></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- 商品编辑弹窗 -->
+<div class="modal-mask" id="fruitModal">
+  <div class="modal">
+    <h3 id="fruitModalTitle">新增商品</h3>
+    <input type="hidden" id="f_id">
+    <label>商品名称</label><input id="f_name" placeholder="如：海南三亚芒果">
+    <div style="display:flex;gap:12px">
+      <div style="flex:1"><label>价格（元）</label><input id="f_price" type="number" min="0.1" step="0.1"></div>
+      <div style="flex:1"><label>单位</label><input id="f_unit" value="斤"></div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <div style="flex:1"><label>分类</label><select id="f_category"><option>热带</option><option>柑橘</option><option>浆果</option><option>瓜类</option><option>温带</option><option>进口</option><option>其他</option></select></div>
+      <div style="flex:1"><label>图标</label><input id="f_image" value="🍎"></div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <div style="flex:1"><label>库存</label><input id="f_stock" type="number" min="0" value="100"></div>
+      <div style="flex:1"><label>产地</label><input id="f_origin"></div>
+    </div>
+    <label>商品描述</label><textarea id="f_desc"></textarea>
+    <div class="row">
+      <button class="op" onclick="closeModal()">取消</button>
+      <button class="op primary" onclick="saveFruit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api/admin';
+const STATUS = { pending:'待发货', shipping:'配送中', done:'已完成', cancelled:'已取消' };
+
+async function post(path, body) {
+  const res = await fetch(API + path, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body||{}) });
+  const json = await res.json();
+  if (!res.ok || json.code !== 0) { alert(json.message || '请求失败'); throw new Error(json.message); }
+  return json.data;
+}
+
+function login() {
+  fetch(API + '/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ username:user.value, password:pass.value }) })
+    .then(r => r.json())
+    .then(j => {
+      if (j.code === 0) { sessionStorage.setItem('admin_token', j.data.token); enter(); }
+      else loginErr.textContent = j.message || '登录失败';
+    }).catch(() => loginErr.textContent = '网络错误');
+}
+function logout() { sessionStorage.removeItem('admin_token'); location.reload(); }
+function enter() {
+  login.style.display = 'none'; app.style.display = 'block';
+  showPage('dashboard');
+}
+if (sessionStorage.getItem('admin_token')) enter();
+
+function showPage(name) {
+  document.querySelectorAll('aside a[data-page]').forEach(a => a.classList.toggle('active', a.dataset.page === name));
+  ['dashboard','fruits','orders'].forEach(p => document.getElementById('page-' + p).style.display = p === name ? '' : 'none');
+  if (name === 'dashboard') loadStats();
+  if (name === 'fruits') loadFruits();
+  if (name === 'orders') loadOrders();
+}
+
+// ---------- 看板 ----------
+async function loadStats() {
+  const s = await post('/stats');
+  document.getElementById('stats').innerHTML = [
+    ['今日销售额 ¥' + s.todaySales, s.todayOrders + ' 单'], ['累计销售额 ¥' + s.totalSales, s.orderCount + ' 单'],
+    ['在售商品', s.fruitCount + ' 件'], ['待处理订单', s.pendingCount + ' 单'],
+  ].map(x => `<div class="stat"><div class="lbl">${x[1]}</div><div class="num">${x[0]}</div></div>`).join('');
+  document.getElementById('lowStock').innerHTML = s.lowStock.length
+    ? s.lowStock.map(f => `<div>🥬 ${f.name}：剩余 ${f.stock} 件</div>`).join('')
+    : '暂无库存预警';
+}
+
+// ---------- 商品 ----------
+let fruits = [];
+async function loadFruits() {
+  const res = await fetch('/api/fruits/all').then(r => r.json());
+  fruits = res.data || [];
+  renderFruits();
+}
+function renderFruits() {
+  const kw = document.getElementById('fruitSearch').value.trim();
+  const list = fruits.filter(f => !kw || f.name.includes(kw));
+  document.getElementById('fruitRows').innerHTML = list.map(f => `
+    <tr>
+      <td>${f.image} ${f.name}</td><td>${f.category}</td><td>¥${f.price}</td><td>${f.unit}</td>
+      <td>${f.stock}</td><td>${f.origin || '-'}</td>
+      <td><span class="tag ${f.onSale ? 'onsale' : 'off'}">${f.onSale ? '在售' : '已下架'}</span></td>
+      <td>
+        <button class="op" onclick="toggleSale('${f.id}')">${f.onSale ? '下架' : '上架'}</button>
+        <button class="op primary" onclick="editFruit('${f.id}')">编辑</button>
+        <button class="op danger" onclick="delFruit('${f.id}')">删除</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="8" style="color:#999">暂无商品</td></tr>';
+}
+function openFruitModal(f) {
+  fruitModalTitle.textContent = f ? '编辑商品' : '新增商品';
+  f_id.value = f?.id || ''; f_name.value = f?.name || ''; f_price.value = f?.price || '';
+  f_unit.value = f?.unit || '斤'; f_category.value = f?.category || '热带'; f_image.value = f?.image || '🍎';
+  f_stock.value = f?.stock ?? 100; f_origin.value = f?.origin || ''; f_desc.value = f?.description || '';
+  fruitModal.style.display = 'flex';
+}
+function editFruit(id) { openFruitModal(fruits.find(f => f.id === id)); }
+function closeModal() { fruitModal.style.display = 'none'; }
+async function saveFruit() {
+  await post('/fruits/save', {
+    id: f_id.value || undefined, name: f_name.value, price: Number(f_price.value), unit: f_unit.value,
+    category: f_category.value, image: f_image.value, stock: Number(f_stock.value),
+    origin: f_origin.value, description: f_desc.value,
+  });
+  closeModal(); loadFruits(); loadStats();
+}
+async function toggleSale(id) {
+  const f = fruits.find(x => x.id === id);
+  await post('/fruits/save', { ...f, onSale: !f.onSale });
+  loadFruits();
+}
+async function delFruit(id) {
+  if (!confirm('确定删除该商品？')) return;
+  await post('/fruits/delete', { id });
+  loadFruits(); loadStats();
+}
+
+// ---------- 订单 ----------
+async function loadOrders() {
+  const res = await fetch('/api/admin/orders/list', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' }).then(r => r.json());
+  const orders = res.data || [];
+  document.getElementById('orderRows').innerHTML = orders.map(o => `
+    <tr>
+      <td style="font-size:12px">${o.id}</td>
+      <td>${o.items.map(i => i.image + i.name + '×' + i.count).join('、')}</td>
+      <td><b>¥${o.total}</b></td><td>${o.phone}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.address}</td>
+      <td style="font-size:12px">${new Date(o.createdAt).toLocaleString('zh-CN')}</td>
+      <td><span class="tag ${o.status}">${STATUS[o.status]}</span></td>
+      <td>
+        ${o.status === 'pending' ? `<button class="op primary" onclick="setStatus('${o.id}','shipping')">发货</button><button class="op danger" onclick="setStatus('${o.id}','cancelled')">取消</button>` : ''}
+        ${o.status === 'shipping' ? `<button class="op primary" onclick="setStatus('${o.id}','done')">完成</button>` : ''}
+        ${o.status === 'pending' || o.status === 'shipping' ? '' : '-'}
+      </td>
+    </tr>`).join('') || '<tr><td colspan="8" style="color:#999">暂无订单，去小程序下几单吧</td></tr>';
+}
+async function setStatus(id, status) {
+  await post('/orders/status', { id, status });
+  loadOrders(); loadStats();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); if (e.key === 'Enter' && login.style.display !== 'none') login(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+.page-detail {
+  min-height: 100vh;
+  background: #f7f8fa;
+  padding-bottom: 160px;
+}
+
+.banner {
+  height: 420px;
+  background: linear-gradient(160deg, #fff8e6, #ffeef0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner .emoji {
+  font-size: 200px;
+}
+
+.info {
+  background: #fff;
+  border-radius: 32px 32px 0 0;
+  margin-top: -32px;
+  padding: 36px 32px;
+}
+
+.name {
+  font-size: 38px;
+  font-weight: bold;
+  color: #333;
+  display: block;
+}
+
+.origin {
+  font-size: 24px;
+  color: #999;
+  margin-top: 14px;
+  display: block;
+}
+
+.price-row {
+  display: flex;
+  align-items: baseline;
+  margin: 24px 0;
+}
+
+.price {
+  color: #ff4d1c;
+  font-size: 48px;
+  font-weight: bold;
+}
+
+.unit {
+  color: #999;
+  font-size: 24px;
+  margin-left: 8px;
+}
+
+.desc {
+  font-size: 26px;
+  color: #666;
+  line-height: 1.7;
+  display: block;
+}
+
+.count-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 40px;
+}
+
+.count-label {
+  font-size: 28px;
+  color: #333;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+}
+
+.step-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: #f2f3f5;
+  color: #333;
+  font-size: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-num {
+  width: 80px;
+  text-align: center;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  display: flex;
+  padding: 20px 28px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.btn {
+  flex: 1;
+  height: 88px;
+  border-radius: 44px;
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.secondary {
+  background: #fff3e0;
+  color: #ff9800;
+  margin-right: 20px;
+}
+
+.primary {
+  background: #07c160;
+  color: #fff;
+}
+
+.loading {
+  display: block;
+  text-align: center;
+  padding: 120px 0;
+  color: #999;
+  font-size: 28px;
+}

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 2,
+  "lib": "miora-spell",
+  "libVersion": "0.0.1-beta.1",
+  "note": "宿主自维护的 QTE 组件目录（miora-spell 为源码分发、无 manifest.json）。entry = 宿主适配器模块名（src/engine/qte/adapters/<entry>.tsx），适配器把 QteContext 映射到库的 Game*Control。整库按 story.json qte.version 整体安装/更新。",
+  "components": {
+    "click": {
+      "entry": "click",
+      "control": "GameClickControl",
+      "propsSchema": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "title": { "type": "string" },
+          "total": { "type": "number", "minimum": 0, "maximum": 600 }
+        }
+      },
+      "capabilities": { "canFail": true, "needsPointer": true }
+    },
+    "combo": {
+      "entry": "combo",
+      "control": "GameComboControl",
+      "propsSchema": {
+        "type": "object",
+        "properties": {
+          "comboTarget": { "type": "number", "minimum": 1, "maximum": 100 },
+          "decayPerSecond": { "type": "number", "minimum": 0, "maximum": 500 },
+          "total": { "type": "number", "minimum": 0, "maximum": 600 },
+          "label": { "type": "string" },
+          "title": { "type": "string" }
+        }
+      },
+      "capabilities": { "canFail": true, "needsPointer": true }
+    },
+    "hold": {
+      "entry": "hold",
+      "control": "GameHoldControl",
+      "propsSchema": {
+        "type": "object",
+        "properties": {
+          "fillSeconds": { "type": "number", "minimum": 0.1, "maximum": 30 },
+          "decayPerSecond": { "type": "number", "minimum": 0, "maximum": 500 },
+          "total": { "type": "number", "minimum": 0, "maximum": 600 },
+          "label": { "type": "string" },
+          "title": { "type": "string" }
+        }
+      },
+      "capabilities": { "canFail": true, "needsPointer": true }
+    },
+    "slide": {
+      "entry": "slide",
+      "control": "GameSlideControl",
+      "propsSchema": {
+        "type": "object",
+        "properties": {
+          "threshold": { "type": "number", "minimum": 1, "maximum": 100 },
+          "angle": { "type": "number", "minimum": -180, "maximum": 180 },
+          "total": { "type": "number", "minimum": 0, "maximum": 600 },
+          "title": { "type": "string" },
+          "knobLabel": { "type": "string" },
+          "successText": { "type": "string" }
+        }
+      },
+      "capabilities": { "canFail": true, "needsPointer": true }
+    }
+  }
+}
