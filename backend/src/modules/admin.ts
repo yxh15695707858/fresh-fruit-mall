@@ -19,20 +19,21 @@ adminRouter.post('/login', (req: Request, res: Response) => {
 })
 
 // 数据看板
-adminRouter.post('/stats', (_req: Request, res: Response) => {
-  const orders = db.orders.filter((o) => o.status !== 'cancelled')
+adminRouter.post('/stats', async (_req: Request, res: Response) => {
+  const [fruits, orders] = await Promise.all([db.allFruits(), db.allOrders()])
+  const valid = orders.filter((o) => o.status !== 'cancelled')
   const today = new Date().toDateString()
-  const todayOrders = orders.filter((o) => new Date(o.createdAt).toDateString() === today)
+  const todayOrders = valid.filter((o) => new Date(o.createdAt).toDateString() === today)
   res.json({
     code: 0,
     data: {
-      fruitCount: db.fruits.length,
-      orderCount: orders.length,
-      totalSales: Number(orders.reduce((s, o) => s + o.total, 0).toFixed(2)),
+      fruitCount: fruits.length,
+      orderCount: valid.length,
+      totalSales: Number(valid.reduce((s, o) => s + o.total, 0).toFixed(2)),
       todaySales: Number(todayOrders.reduce((s, o) => s + o.total, 0).toFixed(2)),
       todayOrders: todayOrders.length,
-      pendingCount: db.orders.filter((o) => o.status === 'pending').length,
-      lowStock: db.fruits.filter((f) => f.stock < 20).map((f) => ({ id: f.id, name: f.name, stock: f.stock })),
+      pendingCount: orders.filter((o) => o.status === 'pending').length,
+      lowStock: fruits.filter((f) => f.stock < 20).map((f) => ({ id: f.id, name: f.name, stock: f.stock })),
     },
   })
 })

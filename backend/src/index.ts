@@ -1,9 +1,11 @@
 import { createApp } from './app'
+import { initDatabase } from './store'
 import { env } from './config/env'
 import { logger } from './config/logger'
 
 const startServer = async () => {
   try {
+    await initDatabase()
     const app = createApp()
 
     app.listen(env.PORT, () => {
